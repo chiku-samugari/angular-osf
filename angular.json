@@ -118,6 +118,7 @@
               "namedChunks": true
             },
             "development": {
+              "baseHref": "/angular_osf/assets/",
               "outputMode": "static",
               "server": false,
               "ssr": false,

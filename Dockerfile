@@ -35,3 +35,8 @@ COPY package*.json ./
 RUN npm ci --no-audit --no-fund
 EXPOSE 4200
 CMD ["npx", "ng", "serve", "--host", "0.0.0.0"]
+
+# Standalone - used as a component of `osf.io`
+FROM local-dev AS standalone
+WORKDIR /app
+COPY . .

@@ -13,11 +13,11 @@ export const environment = {
   /**
    * Base URL of the OSF web application.
    */
-  webUrl: 'https://staging3.osf.io',
+  webUrl: 'http://localhost:5000',
   /**
    * Domain URL used for JSON:API v2 services.
    */
-  apiDomainUrl: 'https://api.staging3.osf.io',
+  apiDomainUrl: 'http://localhost:8000',
   /**
    * Base URL for SHARE discovery search (Trove).
    */
@@ -25,7 +25,7 @@ export const environment = {
   /**
    * URL for the OSF Addons API (v1).
    */
-  addonsApiUrl: 'https://addons.staging3.osf.io/v1',
+  addonsApiUrl: 'http://localhost:8004/v1',
   /**
    * API endpoint for funder metadata resolution via ROR.
    */
@@ -34,7 +34,7 @@ export const environment = {
   /**
    * URL for OSF Central Authentication Service (CAS).
    */
-  casUrl: 'https://accounts.staging3.osf.io',
+  casUrl: 'http://localhost:5000',
   /**
    * Site key used for reCAPTCHA v2 validation in staging.
    */
