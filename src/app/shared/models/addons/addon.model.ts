@@ -1,3 +1,5 @@
+import { AvailableService } from './host-info.model';
+
 export interface AddonModel {
   id: string;
   type: string;
@@ -15,4 +17,5 @@ export interface AddonModel {
   supportedResourceTypes?: string[];
   wbKey?: string;
   redirectUrl?: string;
+  hostInfo?: AvailableService[];
 }

@@ -6,11 +6,13 @@ import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
 
 import { Component, computed, inject, input, output } from '@angular/core';
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { FormSelectComponent } from '@osf/shared/components/form-select/form-select.component';
 import { AddonFormControls } from '@osf/shared/enums/addon-form-controls.enum';
 import { CredentialsFormat } from '@osf/shared/enums/addons-credentials-format.enum';
+import { SelectOption } from '@osf/shared/models/select-option.model';
 import { AddonModel } from '@shared/models/addons/addon.model';
 import { AuthorizedAddonRequestJsonApi } from '@shared/models/addons/addon-json-api.models';
 import { AddonForm } from '@shared/models/addons/addon-utils.models';
@@ -19,7 +21,17 @@ import { AddonFormService } from '@shared/services/addons/addon-form.service';
 
 @Component({
   selector: 'osf-addon-setup-account-form',
-  imports: [Card, FormsModule, ReactiveFormsModule, InputText, Password, TranslatePipe, Button, RouterLink],
+  imports: [
+    Card,
+    FormsModule,
+    ReactiveFormsModule,
+    InputText,
+    Password,
+    TranslatePipe,
+    Button,
+    RouterLink,
+    FormSelectComponent,
+  ],
   templateUrl: './addon-setup-account-form.component.html',
   styleUrl: './addon-setup-account-form.component.scss',
 })
@@ -67,6 +79,26 @@ export class AddonSetupAccountFormComponent {
   });
 
   readonly hasConfigurableApiRoot = computed(() => !!this.addon().configurableApiRoot);
+
+  readonly hasSelectableApiBaseUrls = computed(() => {
+    const addon = this.addon();
+    return 'hostInfo' in addon && !!addon.hostInfo && addon.hostInfo.length > 0;
+  });
+
+  readonly hostUrlOptions = computed<SelectOption[]>(() => {
+    const addon = this.addon();
+    if ('hostInfo' in addon && addon.hostInfo) {
+      return addon.hostInfo.map((service) => ({
+        label: service.name,
+        value: service.host,
+      }));
+    }
+    return [];
+  });
+
+  get hostUrlControl(): FormControl<string> {
+    return this.addonForm().get(AddonFormControls.HostUrl) as FormControl<string>;
+  }
 
   handleSubmit(): void {
     if (!this.isFormValid) return;

@@ -31,6 +31,7 @@ export class AddonMapper {
       iconUrl: response.attributes.icon_url,
       redirectUrl: response.attributes.redirect_url,
       configurableApiRoot: response.attributes.configurable_api_root,
+      hostInfo: response.attributes.host_info?.availableServices,
     };
   }
 

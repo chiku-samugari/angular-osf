@@ -1783,6 +1783,8 @@
         "fields": {
           "hostUrl": "Host URL",
           "hostUrlDescription": "Please include the protocol (http:// or https://) in the URL.",
+          "hostUrlSelect": "Select a host",
+          "hostUrlSelectDescription": "Select a storage service from the list below.",
           "personalAccessToken": "Personal Access Token",
           "username": "Username",
           "password": "Password",

@@ -1,3 +1,5 @@
+import { HostInfo } from './host-info.model';
+
 export interface AddonGetResponseJsonApi {
   type: string;
   id: string;
@@ -12,6 +14,7 @@ export interface AddonGetResponseJsonApi {
     icon_url: string;
     redirect_url?: string;
     configurable_api_root: boolean;
+    host_info?: HostInfo;
     [key: string]: unknown;
   };
   relationships: {

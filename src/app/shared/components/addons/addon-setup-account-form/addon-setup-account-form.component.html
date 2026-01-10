@@ -1,6 +1,20 @@
 <form [formGroup]="addonForm()" (ngSubmit)="handleSubmit()" class="flex flex-column gap-5">
   <p-card>
-    @if (hasConfigurableApiRoot()) {
+    @if (hasSelectableApiBaseUrls()) {
+      <h2 class="mb-2">
+        {{ 'settings.addons.form.fields.hostUrl' | translate }}
+      </h2>
+      <p class="mb-2">
+        {{ 'settings.addons.form.fields.hostUrlSelectDescription' | translate }}
+      </p>
+      <osf-form-select
+        class="mb-4"
+        [control]="hostUrlControl"
+        [options]="hostUrlOptions()"
+        [placeholder]="'settings.addons.form.fields.hostUrlSelect'"
+        [fullWidth]="true"
+      />
+    } @else if (hasConfigurableApiRoot()) {
       <h2 class="mb-2">
         {{ 'settings.addons.form.fields.hostUrl' | translate }}
       </h2>
