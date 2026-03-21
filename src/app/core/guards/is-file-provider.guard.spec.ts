@@ -1,49 +1,137 @@
-import { ParamMap, UrlSegment } from '@angular/router';
+import { TestBed } from '@angular/core/testing';
+import { Route, UrlSegment } from '@angular/router';
 
-import { FileProvider } from '@osf/features/files/constants';
+import { FileProviderRegistryService } from '@core/services/file-provider-registry.service';
 
 import { isFileProvider } from './is-file-provider.guard';
 
-describe('isFileProvider', () => {
-  const createMockParamMap = (): ParamMap => ({
-    get: () => null,
-    getAll: () => [],
-    has: () => false,
-    keys: [],
-  });
+describe('isFileProvider guard', () => {
+  let mockRegistry: jest.Mocked<FileProviderRegistryService>;
 
-  const createMockSegment = (path: string): UrlSegment => ({
-    path,
-    parameters: {},
-    parameterMap: createMockParamMap(),
-  });
+  beforeEach(() => {
+    mockRegistry = {
+      isValidProvider: jest.fn(),
+      getValidProviders: jest.fn(),
+      isInitialized: jest.fn(),
+      initialize: jest.fn(),
+    } as unknown as jest.Mocked<FileProviderRegistryService>;
 
-  const createMockSegments = (path: string) => [createMockSegment(path)];
-
-  it('should return true when id matches a FileProvider value', () => {
-    Object.values(FileProvider).forEach((provider) => {
-      const result = isFileProvider({} as any, createMockSegments(provider));
-      expect(result).toBe(true);
+    TestBed.configureTestingModule({
+      providers: [{ provide: FileProviderRegistryService, useValue: mockRegistry }],
     });
   });
 
-  it('should return false when id does not match any FileProvider value', () => {
-    const result = isFileProvider({} as any, createMockSegments('invalid-provider'));
-    expect(result).toBe(false);
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should return false when segments array is empty', () => {
-    const result = isFileProvider({} as any, []);
-    expect(result).toBe(false);
+  const createUrlSegment = (path: string): UrlSegment => {
+    return new UrlSegment(path, {});
+  };
+
+  const mockRoute: Route = {};
+
+  describe('with valid providers', () => {
+    beforeEach(() => {
+      mockRegistry.isValidProvider.mockImplementation((name: string) => {
+        const validProviders = ['osfstorage', 'googledrive', 'dropbox', 's3compat'];
+        return validProviders.includes(name.toLowerCase());
+      });
+    });
+
+    it('should return true for built-in provider osfstorage', () => {
+      const segments = [createUrlSegment('osfstorage')];
+
+      const result = TestBed.runInInjectionContext(() => isFileProvider(mockRoute, segments));
+
+      expect(result).toBe(true);
+      expect(mockRegistry.isValidProvider).toHaveBeenCalledWith('osfstorage');
+    });
+
+    it('should return true for built-in provider googledrive', () => {
+      const segments = [createUrlSegment('googledrive')];
+
+      const result = TestBed.runInInjectionContext(() => isFileProvider(mockRoute, segments));
+
+      expect(result).toBe(true);
+      expect(mockRegistry.isValidProvider).toHaveBeenCalledWith('googledrive');
+    });
+
+    it('should return true for built-in provider dropbox', () => {
+      const segments = [createUrlSegment('dropbox')];
+
+      const result = TestBed.runInInjectionContext(() => isFileProvider(mockRoute, segments));
+
+      expect(result).toBe(true);
+      expect(mockRegistry.isValidProvider).toHaveBeenCalledWith('dropbox');
+    });
+
+    it('should return true for external provider s3compat (foreign addon)', () => {
+      const segments = [createUrlSegment('s3compat')];
+
+      const result = TestBed.runInInjectionContext(() => isFileProvider(mockRoute, segments));
+
+      expect(result).toBe(true);
+      expect(mockRegistry.isValidProvider).toHaveBeenCalledWith('s3compat');
+    });
+
+    it('should return false for unknown provider', () => {
+      const segments = [createUrlSegment('unknownprovider')];
+
+      const result = TestBed.runInInjectionContext(() => isFileProvider(mockRoute, segments));
+
+      expect(result).toBe(false);
+      expect(mockRegistry.isValidProvider).toHaveBeenCalledWith('unknownprovider');
+    });
   });
 
-  it('should return false when first segment has no path', () => {
-    const result = isFileProvider({} as any, [createMockSegment('')]);
-    expect(result).toBe(false);
+  describe('with empty or missing segments', () => {
+    it('should return false when segments array is empty', () => {
+      const segments: UrlSegment[] = [];
+
+      const result = TestBed.runInInjectionContext(() => isFileProvider(mockRoute, segments));
+
+      expect(result).toBe(false);
+      expect(mockRegistry.isValidProvider).not.toHaveBeenCalled();
+    });
+
+    it('should return false when first segment path is empty', () => {
+      const segments = [createUrlSegment('')];
+
+      const result = TestBed.runInInjectionContext(() => isFileProvider(mockRoute, segments));
+
+      expect(result).toBe(false);
+      expect(mockRegistry.isValidProvider).not.toHaveBeenCalled();
+    });
   });
 
-  it('should return false when first segment is undefined', () => {
-    const result = isFileProvider({} as any, [undefined as any]);
-    expect(result).toBe(false);
+  describe('with multiple segments', () => {
+    beforeEach(() => {
+      mockRegistry.isValidProvider.mockImplementation((name: string) => {
+        return name.toLowerCase() === 'googledrive';
+      });
+    });
+
+    it('should only check the first segment', () => {
+      const segments = [createUrlSegment('googledrive'), createUrlSegment('subfolder'), createUrlSegment('file.txt')];
+
+      const result = TestBed.runInInjectionContext(() => isFileProvider(mockRoute, segments));
+
+      expect(result).toBe(true);
+      expect(mockRegistry.isValidProvider).toHaveBeenCalledWith('googledrive');
+      expect(mockRegistry.isValidProvider).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('registry not initialized scenario', () => {
+    it('should return false when registry has no providers', () => {
+      mockRegistry.isValidProvider.mockReturnValue(false);
+
+      const segments = [createUrlSegment('osfstorage')];
+
+      const result = TestBed.runInInjectionContext(() => isFileProvider(mockRoute, segments));
+
+      expect(result).toBe(false);
+    });
   });
 });
