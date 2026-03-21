@@ -1,6 +1,7 @@
 import { isPlatformBrowser } from '@angular/common';
 import { inject, PLATFORM_ID, provideAppInitializer } from '@angular/core';
 
+import { FileProviderRegistryService } from '@core/services/file-provider-registry.service';
 import { OSFConfigService } from '@core/services/osf-config.service';
 
 import { ENVIRONMENT } from './environment.provider';
@@ -23,8 +24,13 @@ export function initializeApplication() {
     const configService = inject(OSFConfigService);
     const googleTagManagerConfiguration = inject(GoogleTagManagerConfiguration);
     const environment = inject(ENVIRONMENT);
+    const fileProviderRegistry = inject(FileProviderRegistryService);
 
     await configService.load();
+
+    // Initialize the file provider registry to fetch external storage services
+    // This enables foreign addon support (e.g., s3compat)
+    const registryPromise = fileProviderRegistry.initialize();
 
     if (isPlatformBrowser(platformId)) {
       const googleTagManagerId = environment.googleTagManagerId;
@@ -76,6 +82,9 @@ export function initializeApplication() {
       };
       new BrowserAgent(newRelicConfig);
     }
+
+    // Wait for file provider registry initialization
+    await registryPromise;
   };
 }
 
