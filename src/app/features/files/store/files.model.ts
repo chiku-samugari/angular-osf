@@ -11,6 +11,18 @@ import { FileProvider } from '../constants';
 import { OsfFileCustomMetadata } from '../models/file-custom-metadata.model';
 import { OsfFileRevision } from '../models/file-revisions.model';
 
+/**
+ * Type alias for built-in file providers.
+ */
+type BuiltInFileProvider = (typeof FileProvider)[keyof typeof FileProvider];
+
+/**
+ * Extended type that allows both built-in and dynamic (foreign addon) providers.
+ * Built-in providers get full type safety and IDE support, while dynamic providers
+ * (e.g., s3compat from foreign addons) are accepted as strings.
+ */
+export type FileProviderType = BuiltInFileProvider | (string & {});
+
 export interface FilesStateModel {
   files: AsyncStateWithTotalCount<FileModel[]>;
   moveDialogFiles: AsyncStateWithTotalCount<FileModel[]>;
@@ -18,7 +30,7 @@ export interface FilesStateModel {
   moveDialogCurrentFolder: FileFolderModel | null;
   search: string;
   sort: string;
-  provider: (typeof FileProvider)[keyof typeof FileProvider];
+  provider: FileProviderType;
   openedFile: AsyncStateModel<FileDetailsModel | null>;
   fileMetadata: AsyncStateModel<OsfFileCustomMetadata | null>;
   resourceMetadata: AsyncStateModel<ResourceMetadata | null>;
