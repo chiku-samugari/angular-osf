@@ -79,6 +79,12 @@ See [NGXS State Management](./ngxs.md).
 
 ---
 
+## Extensions
+
+Pages and Project-menu entries that a deployment adds from its own package, without changes to this code base: the contract and registry live in `core/extensions/`, the registration site is `app/installed-extensions.ts`. See [Extensions](./extensions.md).
+
+---
+
 ## SSR
 
 Server-side rendering, route render modes, config, and bot traffic are documented in [SSR](./ssr.md). Render metrics are in [SSR metrics](./ssr-metrics.md).

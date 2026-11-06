@@ -24,6 +24,7 @@ take up to 60 seconds once the docker build finishes.
 
 - [Docker Commands](docs/docker.md).
 - [Architecture](docs/arch.md).
+- [Extensions](docs/extensions.md).
 - [ESLint Strategy](docs/eslint.md).
 - [Git Conventions](docs/git-convention.md).
 - [i18n](docs/i18n.md).
