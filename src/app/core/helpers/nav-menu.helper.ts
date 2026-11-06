@@ -6,6 +6,7 @@ import {
   VIEW_ONLY_PROJECT_MENU_ITEMS,
   VIEW_ONLY_REGISTRY_MENU_ITEMS,
 } from '@core/constants/nav-items.constant';
+import { OsfResolvedExtensionMenuItem } from '@core/extensions';
 import { RouteContext } from '@core/models/route-context.model';
 import { UserPermissions } from '@osf/shared/enums/user-permissions.enum';
 
@@ -49,14 +50,18 @@ export function filterMenuItems(items: CustomMenuItem[], isAuthenticated: boolea
   });
 }
 
-export function updateMenuItems(menuItems: CustomMenuItem[], ctx: RouteContext): CustomMenuItem[] {
+export function updateMenuItems(
+  menuItems: CustomMenuItem[],
+  ctx: RouteContext,
+  extensionProjectItems: OsfResolvedExtensionMenuItem[] = []
+): CustomMenuItem[] {
   return menuItems.map((item) => {
     if (item.id === 'my-resources') {
       return updateMyResourcesMenuItem(item, ctx);
     }
 
     if (item.id === 'projects') {
-      return updateProjectMenuItem(item, ctx);
+      return updateProjectMenuItem(item, ctx, extensionProjectItems);
     }
 
     if (item.id === 'registries') {
@@ -88,12 +93,16 @@ function updateMyResourcesMenuItem(item: CustomMenuItem, ctx: RouteContext): Cus
   };
 }
 
-function updateProjectMenuItem(item: CustomMenuItem, ctx: RouteContext): CustomMenuItem {
+function updateProjectMenuItem(
+  item: CustomMenuItem,
+  ctx: RouteContext,
+  extensionItems: OsfResolvedExtensionMenuItem[]
+): CustomMenuItem {
   const hasProject = ctx.isProject && !!ctx.resourceId;
   const items = (item.items || []).map((subItem) => {
     if (subItem.id === 'project-details') {
       if (hasProject) {
-        let menuItems = PROJECT_MENU_ITEMS;
+        let menuItems: CustomMenuItem[] = PROJECT_MENU_ITEMS;
 
         if (ctx.viewOnly) {
           const allowedViewOnlyItems = VIEW_ONLY_PROJECT_MENU_ITEMS;
@@ -116,6 +125,8 @@ function updateProjectMenuItem(item: CustomMenuItem, ctx: RouteContext): CustomM
           };
         });
 
+        menuItems = insertExtensionMenuItems(menuItems, extensionItems, ctx);
+
         return {
           ...subItem,
           visible: true,
@@ -133,6 +144,42 @@ function updateProjectMenuItem(item: CustomMenuItem, ctx: RouteContext): CustomM
   });
 
   return { ...item, visible: hasProject, expanded: hasProject, items };
+}
+
+/**
+ * Places the installed extensions' items among the project's own: each
+ * after the item it names (`insertAfter`), otherwise at the end. An item is
+ * subject to the same permission check as the project's own items, is
+ * left out in view-only mode unless it opts in, and keeps the visibility
+ * its extension decided.
+ */
+function insertExtensionMenuItems(
+  menuItems: CustomMenuItem[],
+  extensionItems: OsfResolvedExtensionMenuItem[],
+  ctx: RouteContext
+): CustomMenuItem[] {
+  const result = [...menuItems];
+
+  for (const extensionItem of extensionItems) {
+    if (ctx.viewOnly && !extensionItem.viewOnly) {
+      continue;
+    }
+
+    const { insertAfter, viewOnly: _viewOnly, ...menuItem } = extensionItem;
+    const resolved: CustomMenuItem = {
+      ...menuItem,
+      visible: extensionItem.visible && shouldShowMenuItem(menuItem, ctx.permissions),
+    };
+    const anchor = insertAfter ? result.findIndex((existing) => existing.id === insertAfter) : -1;
+
+    if (anchor >= 0) {
+      result.splice(anchor + 1, 0, resolved);
+    } else {
+      result.push(resolved);
+    }
+  }
+
+  return result;
 }
 
 function updateRegistryMenuItem(item: CustomMenuItem, ctx: RouteContext): CustomMenuItem {

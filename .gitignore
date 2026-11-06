@@ -8,6 +8,10 @@
 /bazel-out
 /src/assets/config/config.json 
 
+# Deployment-installed extensions (see docs/extensions.md)
+/src/extensions/*
+!/src/extensions/README.md
+
 # Node
 /node_modules
 npm-debug.log

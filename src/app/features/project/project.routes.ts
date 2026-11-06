@@ -1,7 +1,9 @@
 import { provideStates } from '@ngxs/store';
 
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 
+import { OsfExtensionRegistry } from '@core/extensions';
 import { viewOnlyGuard } from '@core/guards/view-only.guard';
 import { ResourceType } from '@osf/shared/enums/resource-type.enum';
 import { ActivityLogsState } from '@osf/shared/stores/activity-logs';
@@ -131,6 +133,11 @@ export const projectRoutes: Routes = [
         data: { canonicalPath: 'links' },
         loadComponent: () =>
           import('../project/linked-services/linked-services.component').then((mod) => mod.LinkedServicesComponent),
+      },
+      {
+        // pages contributed by installed extensions (see docs/extensions.md)
+        path: '',
+        loadChildren: () => inject(OsfExtensionRegistry).projectRoutes,
       },
     ],
   },

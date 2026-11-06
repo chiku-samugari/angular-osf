@@ -1,4 +1,4 @@
-import { provideTranslateLoader, TranslateLoader, TranslationObject } from '@ngx-translate/core';
+import { TranslateLoader, TranslationObject } from '@ngx-translate/core';
 
 import { Observable, of } from 'rxjs';
 
@@ -6,6 +6,7 @@ import { ApplicationConfig, mergeApplicationConfig } from '@angular/core';
 import { provideServerRendering, withRoutes } from '@angular/ssr';
 
 import { SSR_CONFIG } from '@core/constants/ssr-config.token';
+import { OSF_BASE_TRANSLATE_LOADER } from '@core/extensions';
 import { ConfigModel } from '@core/models/config.model';
 
 import en from '../assets/i18n/en.json';
@@ -33,7 +34,7 @@ class SsrTranslateLoader implements TranslateLoader {
 const serverConfig: ApplicationConfig = {
   providers: [
     provideServerRendering(withRoutes(serverRoutes)),
-    provideTranslateLoader(SsrTranslateLoader),
+    { provide: OSF_BASE_TRANSLATE_LOADER, useClass: SsrTranslateLoader },
     { provide: SSR_CONFIG, useValue: ssrConfig },
   ],
 };

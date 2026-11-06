@@ -10,6 +10,7 @@ import { provideClientHydration, withEventReplay } from '@angular/platform-brows
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 
 import { STATES } from '@core/constants/ngxs-states.constant';
+import { provideOsfExtensions } from '@core/extensions';
 import { provideTranslation } from '@core/helpers/i18n.helper';
 import { authInterceptor } from '@core/interceptors/auth.interceptor';
 import { errorInterceptor } from '@core/interceptors/error.interceptor';
@@ -19,6 +20,7 @@ import { SENTRY_PROVIDER } from '@core/provider/sentry.provider';
 
 import CustomPreset from './core/theme/custom-preset';
 import { routes } from './app.routes';
+import { INSTALLED_EXTENSIONS } from './installed-extensions';
 
 import * as Sentry from '@sentry/angular';
 
@@ -51,5 +53,6 @@ export const appConfig: ApplicationConfig = {
       },
     }),
     provideStore(STATES),
+    provideOsfExtensions(INSTALLED_EXTENSIONS),
   ],
 };

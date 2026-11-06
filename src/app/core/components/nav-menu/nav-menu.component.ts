@@ -12,6 +12,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { MENU_ITEMS } from '@core/constants/nav-items.constant';
+import { OsfExtensionRegistry } from '@core/extensions';
 import { filterMenuItems, updateMenuItems } from '@core/helpers/nav-menu.helper';
 import { CustomMenuItem } from '@core/models/custom-menu-item.model';
 import { RouteContext } from '@core/models/route-context.model';
@@ -40,6 +41,7 @@ export class NavMenuComponent {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly viewOnlyService = inject(ViewOnlyLinkHelperService);
   private readonly translateService = inject(TranslateService);
+  private readonly extensionRegistry = inject(OsfExtensionRegistry);
 
   private readonly isAuthenticated = select(UserSelectors.isAuthenticated);
   private readonly currentResource = select(CurrentResourceSelectors.getCurrentResource);
@@ -48,12 +50,8 @@ export class NavMenuComponent {
 
   readonly actions = createDispatchMap({ getResourceDetails: GetResourceDetails });
 
-  readonly mainMenuItems = computed(() => {
-    this.translationsReady();
-    const isAuthenticated = this.isAuthenticated();
-    const filtered = filterMenuItems(MENU_ITEMS, isAuthenticated);
-
-    const routeContext: RouteContext = {
+  readonly routeContext = computed<RouteContext>(() => {
+    return {
       resourceId: this.currentResourceId(),
       providerId: this.provider()?.id,
       isProject:
@@ -77,8 +75,16 @@ export class NavMenuComponent {
       viewOnly: this.viewOnlyService.getViewOnlyParam(this.router),
       permissions: this.currentResource()?.permissions,
     };
+  });
 
-    const items = updateMenuItems(filtered, routeContext);
+  private readonly extensionProjectMenuItems = this.extensionRegistry.resolveProjectMenuItems(this.routeContext);
+
+  readonly mainMenuItems = computed(() => {
+    this.translationsReady();
+    const isAuthenticated = this.isAuthenticated();
+    const filtered = filterMenuItems(MENU_ITEMS, isAuthenticated);
+
+    const items = updateMenuItems(filtered, this.routeContext(), this.extensionProjectMenuItems());
 
     this.translateMenuItems(items);
 

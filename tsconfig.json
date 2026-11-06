@@ -21,6 +21,7 @@
     "types": ["vitest/globals", "node"],
     "paths": {
       "@osf/*": ["src/app/*"],
+      "@extensions/*": ["src/extensions/*"],
       "@core/*": ["src/app/core/*"],
       "@shared/*": ["src/app/shared/*"],
       "@styles/*": ["src/styles/*"],

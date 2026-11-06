@@ -73,7 +73,7 @@ module.exports = defineConfig(
             ['^@angular'],
 
             // Internal aliases (customize as needed)
-            ['^@core/', '^@osf/', '^@shared/'],
+            ['^@core/', '^@extensions/', '^@osf/', '^@shared/'],
 
             // Testing utilities and mocks
             ['^@testing/'],
